@@ -3,15 +3,15 @@ import { useState, useRef } from "react";
 const MAGASINS = [
   "ARGENTON SUR CREUSE","AUBIGNY S/NERE","BARBEZIEUX","BELLAC","BERGERAC","BERGERAC 2",
   "BLERE","BRESSUIRE","CHALAIS","CHALLANS","CHANTONNAY","CHATEAU RENAULT",
-  "CHATELLERAULT","CHATELLERAULT 2","CHATILLON S/INDRE","CHINON","COGNAC","CONFOLENS",
-  "CONTRES","CREYSSE/BERGERAC","CUSSAC","EGLETONS","FERRIERES","FONTENAY LE COMTE",
+  "CHATELLERAULT","CHATILLON S/INDRE","CHINON","COGNAC","CONFOLENS",
+  "CONTRES","CREYSSE","CUSSAC","EGLETONS","FERRIERES","FONTENAY LE COMTE",
   "ISSOUDUN","JARD SUR MER","JARDRES","JARNAC","JONZAC","LA CHATRE","LA FLOTTE EN RE",
   "LA GUERINIERE","LA SOUTERRAINE","LA VILLE AUX DAMES","LALINDE","LE FENOUILLER",
   "LES HERBIERS","LOCHES","LUCON","LUSSAC LES CHATEAUX","MARENNES",
   "MONTPON MENESTEROL","NONTRON","NOYERS SUR CHER","ORVAL","POCE SUR CISSE",
   "PONS","RIBERAC","ROCHECHOUART","ROCHEFORT","ROCHEFORT SUR MER","ROMORANTIN",
   "ROYAN","SAINT FLORENT SUR CHER","SAINT JEAN D'ANGELY","SAINTE MAURE DE TOURAINE",
-  "SAINTES","SANCOINS","SARLAT","SARLAT 2","SAVIGNE","SELLES SUR CHER","SURGERES",
+  "SAINTES","SANCOINS","SAVIGNE","SELLES SUR CHER","SURGERES",
   "TERRASSON","THOUARS","UZERCHE","VENDOME","VIERZON","YZEURES/CREUSE"
 ];
 
@@ -20,6 +20,8 @@ const CAT_COLORS = {
   "Tête de rayon":"#e74c3c","Mise en avant":"#e67e22","Merchandising":"#27ae60",
   "Vitrine":"#2980b9","Promotion":"#8e44ad","Autre":"#7f8c8d"
 };
+
+const MOD_CODE = "BRICO2026";
 
 const fmt = (ts) => new Date(ts).toLocaleDateString("fr-FR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
 
@@ -69,6 +71,9 @@ export default function App() {
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [uploading, setUploading] = useState(false);
   const [notif, setNotif] = useState({msg:"",ok:true});
+  const [isMod, setIsMod] = useState(false);
+  const [modInput, setModInput] = useState("");
+  const [showModLogin, setShowModLogin] = useState(false);
   const fileRef = useRef();
 
   const notify = (msg, ok=true) => { setNotif({msg,ok}); setTimeout(()=>setNotif({msg:"",ok:true}),3000); };
@@ -118,6 +123,25 @@ export default function App() {
     setNewComment("");
   };
 
+  const handleDelete = (postId) => {
+    if (!isMod) return;
+    if (!window.confirm("Supprimer cette photo ?")) return;
+    setPosts(prev => prev.filter(p => p.id !== postId));
+    if (selectedPost?.id === postId) setView("feed");
+    notify("🗑️ Photo supprimée");
+  };
+
+  const handleModLogin = () => {
+    if (modInput === MOD_CODE) {
+      setIsMod(true);
+      setShowModLogin(false);
+      setModInput("");
+      notify("✅ Mode modérateur activé");
+    } else {
+      notify("❌ Code incorrect", false);
+    }
+  };
+
   const filtered = posts.filter(p =>
     (filter==="Tous" || p.category===filter) &&
     (magasinFilter==="Tous" || p.magasin===magasinFilter)
@@ -139,6 +163,13 @@ export default function App() {
               <button onClick={()=>{ setSelectedPost(null); setView("upload"); }} style={{background:"#f39c12",border:"none",color:"#fff",borderRadius:18,padding:"6px 14px",cursor:"pointer",fontSize:13,fontWeight:700}}>+ Partager</button>
             </div>
           </div>
+          {showModLogin && (
+            <div style={{background:"rgba(0,0,0,0.35)",padding:"8px 16px",display:"flex",alignItems:"center",gap:8}}>
+              <input value={modInput} onChange={e=>setModInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleModLogin()} placeholder="Code modérateur..." type="password" style={{flex:1,background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",borderRadius:8,padding:"4px 10px",fontSize:12}}/>
+              <button onClick={handleModLogin} style={{background:"#f39c12",border:"none",color:"#fff",borderRadius:8,padding:"4px 12px",cursor:"pointer",fontSize:12,fontWeight:700}}>OK</button>
+              <button onClick={()=>setShowModLogin(false)} style={{background:"rgba(255,255,255,0.15)",border:"none",color:"#fff",borderRadius:8,padding:"4px 10px",cursor:"pointer",fontSize:12}}>✕</button>
+            </div>
+          )}
           <div style={{background:"rgba(0,0,0,0.18)",padding:"8px 16px 10px",display:"flex",alignItems:"center",gap:8}}>
             <span style={{color:"rgba(255,255,255,0.7)",fontSize:12,flexShrink:0}}>🏪</span>
             <select value={magasin} onChange={e=>setMagasin(e.target.value)} style={{flex:1,background:"rgba(255,255,255,0.13)",border:"1px solid rgba(255,255,255,0.25)",color:"#fff",borderRadius:8,padding:"4px 8px",fontSize:12}}>
@@ -146,6 +177,9 @@ export default function App() {
               {MAGASINS.map(m=><option key={m} value={m} style={{color:"#333"}}>{m}</option>)}
             </select>
             {magasin && <span style={{fontSize:16}}>✅</span>}
+            <button onClick={()=>isMod?setIsMod(false):setShowModLogin(v=>!v)} style={{background:isMod?"#e74c3c":"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.3)",color:"#fff",borderRadius:8,padding:"3px 8px",cursor:"pointer",fontSize:10,flexShrink:0}}>
+              {isMod?"🔓 MOD":"🔐"}
+            </button>
           </div>
         </div>
       </div>
@@ -251,10 +285,11 @@ export default function App() {
               </div>
               <img src={selectedPost.image} alt="" style={{width:"100%",objectFit:"contain",maxHeight:380,display:"block"}}/>
               {selectedPost.comment && <div style={{padding:"12px 16px 0",fontSize:14,color:"#444"}}><b>{selectedPost.magasin}</b> {selectedPost.comment}</div>}
-              <div style={{padding:"10px 16px",borderBottom:"1px solid #f5f5f5"}}>
+              <div style={{padding:"10px 16px",borderBottom:"1px solid #f5f5f5",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                 <button onClick={()=>handleLike(selectedPost.id)} style={{background:"none",border:"none",cursor:"pointer",padding:0,color:selectedPost.likes.includes(magasin)?"#e74c3c":"#bbb",fontSize:15,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>
                   {selectedPost.likes.includes(magasin)?"❤️":"🤍"} {selectedPost.likes.length} j'aime
                 </button>
+                {isMod && <button onClick={()=>handleDelete(selectedPost.id)} style={{background:"#fdecea",border:"1px solid #e74c3c",color:"#e74c3c",borderRadius:8,padding:"6px 14px",cursor:"pointer",fontSize:13,fontWeight:700}}>🗑️ Supprimer</button>}
               </div>
               <div style={{padding:"14px 16px"}}>
                 <div style={{fontWeight:700,color:"#333",marginBottom:14,fontSize:14}}>💬 {selectedPost.comments.length} commentaire{selectedPost.comments.length!==1?"s":""}</div>
