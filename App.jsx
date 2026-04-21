@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 
 const MAGASINS = [
-  "ARGENTON SUR CREUSE","AUBIGNY S/NERE","BARBEZIEUX","BELLAC","BERGERAC","BERGERAC 2",
+  "ARGENTON SUR CREUSE","AUBIGNY S/NERE","BARBEZIEUX","BELLAC","BERGERAC",
   "BLERE","BRESSUIRE","CHALAIS","CHALLANS","CHANTONNAY","CHATEAU RENAULT",
   "CHATELLERAULT","CHATILLON S/INDRE","CHINON","COGNAC","CONFOLENS",
   "CONTRES","CREYSSE","CUSSAC","EGLETONS","FERRIERES","FONTENAY LE COMTE",
@@ -15,10 +15,10 @@ const MAGASINS = [
   "TERRASSON","THOUARS","UZERCHE","VENDOME","VIERZON","YZEURES/CREUSE"
 ];
 
-const CATEGORIES = ["Tête de rayon","Mise en avant","Merchandising","Vitrine","Promotion","Autre"];
+const CATEGORIES = ["Tête de gondole","Mise en avant","Merchandising","sas","Promotion","Autre"];
 const CAT_COLORS = {
-  "Tête de rayon":"#e74c3c","Mise en avant":"#e67e22","Merchandising":"#27ae60",
-  "Vitrine":"#2980b9","Promotion":"#8e44ad","Autre":"#7f8c8d"
+  "Tête de gondole":"#e74c3c","Mise en avant":"#e67e22","Merchandising":"#27ae60",
+  "sas":"#2980b9","Promotion":"#8e44ad","Autre":"#7f8c8d"
 };
 
 const MOD_CODE = "BRICO2026";
